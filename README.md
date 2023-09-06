@@ -1,6 +1,6 @@
 # React + Vite
 
-#Actualizar sistema
+##Actualizar sistema
 
 ```
 sudo apt update
@@ -16,7 +16,7 @@ bash
 sudo apt install -y nodejs npm
 ```
 
-#Clonar el repositorio
+##Clonar el repositorio
 
 ```
 git clone https://github.com/tu-usuario/tu-proyecto.git
