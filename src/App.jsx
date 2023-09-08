@@ -1,103 +1,110 @@
-import React from "react";
-import { GoogleMap, LoadScript, Marker , Polyline  } from "@react-google-maps/api";
+import React, { useEffect, useState } from "react";
+import axios from 'axios';
+import {
+  GoogleMap,
+  LoadScript,
+  Marker,
+  Polyline,
+} from "@react-google-maps/api";
 import { Card, CardBody } from "@nextui-org/react";
+import DeviceThermostatIcon from "@mui/icons-material/DeviceThermostat";
+import { FaTemperatureLow } from "react-icons/fa";
 
 const mapStyles = [
   {
-    "featureType": "all",
-    "elementType": "geometry",
-    "stylers": [
+    featureType: "all",
+    elementType: "geometry",
+    stylers: [
       {
-        "color": "#202c3e"
-      }
-    ]
+        color: "#202c3e",
+      },
+    ],
   },
   {
-    "featureType": "all",
-    "elementType": "labels.text.fill",
-    "stylers": [
+    featureType: "all",
+    elementType: "labels.text.fill",
+    stylers: [
       {
-        "gamma": 0.01
+        gamma: 0.01,
       },
       {
-        "lightness": 20
+        lightness: 20,
       },
       {
-        "weight": "1.39"
+        weight: "1.39",
       },
       {
-        "color": "#ffffff"
-      }
-    ]
+        color: "#ffffff",
+      },
+    ],
   },
   {
-    "featureType": "all",
-    "elementType": "labels.text.stroke",
-    "stylers": [
+    featureType: "all",
+    elementType: "labels.text.stroke",
+    stylers: [
       {
-        "weight": "0.96"
+        weight: "0.96",
       },
       {
-        "saturation": "9"
+        saturation: "9",
       },
       {
-        "visibility": "on"
+        visibility: "on",
       },
       {
-        "color": "#000000"
-      }
-    ]
+        color: "#000000",
+      },
+    ],
   },
   {
-    "featureType": "administrative",
-    "elementType": "geometry",
-    "stylers": [
+    featureType: "administrative",
+    elementType: "geometry",
+    stylers: [
       {
-        "weight": 0.6
+        weight: 0.6,
       },
       {
-        "color": "#1a3541"
-      }
-    ]
+        color: "#1a3541",
+      },
+    ],
   },
   {
-    "featureType": "landscape",
-    "elementType": "geometry",
-    "stylers": [
+    featureType: "landscape",
+    elementType: "geometry",
+    stylers: [
       {
-        "color": "#2c5a71"
-      }
-    ]
+        color: "#2c5a71",
+      },
+    ],
   },
   {
-    "featureType": "poi",
-    "elementType": "geometry",
-    "stylers": [
+    featureType: "poi",
+    elementType: "geometry",
+    stylers: [
       {
-        "color": "#406d80"
-      }
-    ]
+        color: "#406d80",
+      },
+    ],
   },
   {
-    "featureType": "road",
-    "elementType": "geometry",
-    "stylers": [
+    featureType: "road",
+    elementType: "geometry",
+    stylers: [
       {
-        "color": "#1a3541"
-      }
-    ]
+        color: "#1a3541",
+      },
+    ],
   },
   {
-    "featureType": "water",
-    "elementType": "geometry",
-    "stylers": [
+    featureType: "water",
+    elementType: "geometry",
+    stylers: [
       {
-        "color": "#0b162a"
-      }
-    ]
-  }
+        color: "#0b162a",
+      },
+    ],
+  },
 ];
-
 
 const mapContainerStyle = {
   flex: 8,
@@ -115,27 +122,60 @@ const tokyo = {
 };
 
 function App() {
+  const [weatherData, setWeatherData] = useState(null);
+  const [earthquakeData, setEarthquakeData] = useState(null);
+  const [earthquakeLocation, setEarthquakeLocation] = useState(null);
+
+
+  useEffect(() => {
+    const fetchData = () => {
+      axios.get('http://localhost:3000/last-weather')
+        .then(response => {
+          setWeatherData(response.data);
+        })
+        .catch(error => {
+          console.log('Error fetching weather data:', error);
+        });
+
+      axios.get('http://localhost:3000/last-earthquake')
+        .then(response => {
+          setEarthquakeData(response.data);
+          setEarthquakeLocation({
+            lat: response.data.latitude,
+            lng: response.data.longitude,
+          });
+        })
+        .catch(error => {
+          console.log('Error fetching earthquake data:', error);
+        });
+    };
+
+    fetchData();
+    const intervalId = setInterval(fetchData, 60000);
+    return () => clearInterval(intervalId);
+  }, []);
+  
   return (
     <div style={{ display: "flex" }}>
-    <LoadScript googleMapsApiKey="AIzaSyBFmHQZbFE_a03SwzXH7omemM7KSE8Qfm4">
+      <LoadScript googleMapsApiKey="AIzaSyDP5A0BTih2FrpIIrVAxR1e5n8PzSXehyE">
       <GoogleMap
-        mapContainerStyle={mapContainerStyle}
-        center={center}
-        zoom={2}
-        options={{ styles: mapStyles }}
-      >
-    
-        
-        <Polyline
-    path={[center, tokyo]}
-    options={{
-      strokeColor: "#FF0000",
-      strokeOpacity: 1,
-      strokeWeight: 2,
-    }}
-  />
-      </GoogleMap>
-    </LoadScript>
+          mapContainerStyle={mapContainerStyle}
+          center={center}
+          zoom={2}
+          options={{ styles: mapStyles }}
+        >
+          {earthquakeLocation && (
+            <Polyline
+              path={[center, earthquakeLocation]}
+              options={{
+                strokeColor: "#FF0000",
+                strokeOpacity: 1,
+                strokeWeight: 2,
+              }}
+            />
+          )}
+        </GoogleMap>
+      </LoadScript>
       <div
         style={{
           flex: 2,
@@ -156,7 +196,35 @@ function App() {
             width: "90%",
           }}
         >
-          <CardBody>fdas</CardBody>
+          <CardBody>
+            <div
+              style={{
+                display: "flex",
+                alignItems: "center",
+                // marginTop: "10px",
+              }}
+            >
+              <DeviceThermostatIcon
+                style={{
+                  color: "black",
+                  fontSize: "50px",
+                  marginRight: "50px",
+                  // marginTop: "100px",
+                }}
+              />
+              {weatherData ? (
+              <div>
+                <h5>Last Weather Data:</h5>
+                <p>San Francisco: {weatherData.San_Francisco}°C</p>
+                <p>New York: {weatherData.New_York}°C</p>
+                <p>Mexico City: {weatherData.Mexico_City}°C</p>
+                <p>London: {weatherData.London}°C</p>
+              </div>
+            ) : (
+              <p>Loading weather data...</p>
+            )}
+            </div>
+          </CardBody>
         </Card>
 
         <Card
@@ -168,7 +236,19 @@ function App() {
             width: "90%",
           }}
         >
-          <CardBody>fdas</CardBody>
+          <CardBody>
+
+          {earthquakeData ? (
+              <div>
+                <h4>Last Earthquake Data:</h4>
+                <p>Place: {earthquakeData.place}</p>
+                <p>Date: {new Date(earthquakeData.date).toString()}</p>
+                {/* ... */}
+              </div>
+            ) : (
+              <p>Loading earthquake data...</p>
+            )}
+          </CardBody>
         </Card>
         <Card
           style={{
@@ -179,7 +259,19 @@ function App() {
             width: "90%",
           }}
         >
-          <CardBody>fdas</CardBody>
+          <CardBody>
+          {earthquakeData ? (
+              <div>
+                <h4>Last Earthquake Data:</h4>
+                <p>Magnitude: {earthquakeData.mag}</p>
+               
+
+              </div>
+            ) : (
+              <p>Loading earthquake data...</p>
+            )}
+
+          </CardBody>
         </Card>
         <Card
           style={{
@@ -190,7 +282,19 @@ function App() {
             width: "90%",
           }}
         >
-          <CardBody>fdas</CardBody>
+          <CardBody>
+          {earthquakeData ? (
+              <div>
+                <h4>Last Earthquake Data:</h4>
+                <p>Lat: {earthquakeData.latitude}</p>
+                <p>Long: {earthquakeData.longitude}</p>
+               
+
+              </div>
+            ) : (
+              <p>Loading earthquake data...</p>
+            )}
+          </CardBody>
         </Card>
       </div>
     </div>
