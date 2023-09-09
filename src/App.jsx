@@ -129,7 +129,7 @@ function App() {
 
   useEffect(() => {
     const fetchData = () => {
-      axios.get('http://localhost:3000/last-weather')
+      axios.get('https://back.museum.roadmap.mx/last-weather')
         .then(response => {
           setWeatherData(response.data);
         })
@@ -137,7 +137,7 @@ function App() {
           console.log('Error fetching weather data:', error);
         });
 
-      axios.get('http://localhost:3000/last-earthquake')
+      axios.get('https://back.museum.roadmap.mx/last-earthquake')
         .then(response => {
           setEarthquakeData(response.data);
           setEarthquakeLocation({
